@@ -1,6 +1,6 @@
 /**
  * الخطة التشغيلية 2026/2027 — الإدارة التنفيذية للاتصالات وتقنية المعلومات
- * Google Apps Script Web App backend  —  Version v1.1
+ * Google Apps Script Web App backend  —  Version v1.4
  *
  * التركيب:
  *  1. أنشئ Google Sheet جديد باسم: "الخطة التشغيلية 2026-2027 - ICTD"
@@ -15,13 +15,13 @@ var SHEET_NAME = 'الخطة التشغيلية';
 var META_SHEET = 'بيانات الإدارة';
 
 var FIELDS = ['strategicGoal','operationalGoal','initiative','priority','status','startDate','endDate',
-              'activities','activityDates','kpi','targetValue','budget','resources','risks','mitigation'];
+              'activities','activityDates','kpi','targetValue','budget','resources','risks','mitigation','sponsor'];
 
 var HEADERS = ['معرف السجل',' الهدف الإستراتيجي','الهدف التشغيلي','المبادرة الإستراتيجية','الأولوية','حالة التنفيذ',
                'تاريخ البداية','تاريخ النهاية','الأنشطة/المشاريع التفصيلية للمبادرة',
                'موعد إتمام الأنشطة / المشاريع (July 2026 - Jun 2027)','مؤشر الأداء (تشغيلي لقياس إنجاز المبادرة)',
-               'القيمة المستهدفة (لمؤشر الأداء)','الميزانية','الموارد المطلوبة','المخاطر المحتملة','خطة المعالجة',
-               'آخر تحديث'];
+               'القيمة المستهدفة (لمؤشر الأداء)','الميزانية','الموارد المطلوبة','المخاطر المحتملة','خطة المعالجة','راعي المبادرة',
+               'تفاصيل الأنشطة (JSON)','آخر تحديث'];
 
 /* ------------------------------------------------------------------ */
 
@@ -57,6 +57,7 @@ function getMetaSheet_() {
 function rowToArray_(r) {
   var a = [r.id || ('r' + new Date().getTime())];
   FIELDS.forEach(function (f) { a.push(r[f] == null ? '' : String(r[f])); });
+  a.push(r.items ? JSON.stringify(r.items) : '');
   a.push(Utilities.formatDate(new Date(), 'Asia/Riyadh', 'yyyy-MM-dd HH:mm'));
   return a;
 }
@@ -76,6 +77,8 @@ function styleData_(sh) {
   sh.setColumnWidth(9, 420);   // الأنشطة
   sh.setColumnWidth(12, 320);  // القيمة المستهدفة
   sh.setColumnWidth(16, 300);  // خطة المعالجة
+  sh.setColumnWidth(17, 160);  // راعي المبادرة
+  sh.setColumnWidth(18, 120);  // تفاصيل الأنشطة (JSON)
 }
 
 /* ------------------------------------------------------------------ */
@@ -94,6 +97,8 @@ function doGet(e) {
       var o = { id: String(v[0]) };
       FIELDS.forEach(function (f, k) { o[f] = v[k + 1] instanceof Date
         ? Utilities.formatDate(v[k + 1], 'Asia/Riyadh', 'yyyy-MM-dd') : String(v[k + 1] || ''); });
+      var raw = String(v[FIELDS.length + 1] || '');
+      if (raw) { try { o.items = JSON.parse(raw); } catch (ignore) {} }
       out.push(o);
     }
     var ms = getMetaSheet_().getRange('B2:B4').getValues();

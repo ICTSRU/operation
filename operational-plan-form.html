@@ -30,7 +30,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'Cairo',Tahoma,A
 .card > h2{margin:0 0 14px;font-size:16px;color:var(--purple);border-right:4px solid var(--blue);padding-right:10px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
 .grid.full{grid-template-columns:1fr}
-.field label{display:block;font-weight:600;font-size:13px;margin-bottom:5px;color:var(--ink)}
+.field label{display:block;font-weight:700;font-size:13px;margin-bottom:5px;color:var(--ink)}
 .field label .req{color:#c0392b}
 .field .hint{font-weight:400;font-size:11.5px;color:var(--muted);display:block;margin-top:2px}
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:13.5px;background:#fff;color:var(--ink)}
@@ -47,7 +47,7 @@ button{font-family:inherit;font-size:13.5px;font-weight:600;padding:9px 16px;bor
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
 .stat{background:#fff;border:1px solid var(--border);border-right:4px solid var(--purple);border-radius:var(--radius);padding:12px 14px}
 .stat .n{font-size:24px;font-weight:700;color:var(--purple)}
-.stat .l{font-size:12.5px;color:var(--muted)}
+.stat .l{font-size:12.5px;color:var(--muted);font-weight:700}
 .tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:#fff}
 table{border-collapse:collapse;width:100%;min-width:1100px;font-size:12.5px}
 th{background:var(--xl-cyan);color:#10263a;font-weight:700;padding:10px 8px;border:1px solid #9ad;text-align:center;position:sticky;top:0}
@@ -73,7 +73,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 .cfg{font-size:12.5px;background:var(--purple-light);border:1px dashed var(--purple);border-radius:var(--radius);padding:10px 12px;margin-bottom:14px}
 .actsection{margin-top:18px;border-top:1px dashed var(--border);padding-top:14px}
 .actheader{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.actheader h3{margin:0;font-size:15px;color:var(--purple)}
+.actheader h3{margin:0;font-size:15px;color:var(--purple);font-weight:700}
 .actblock{border:1px solid var(--border);border-right:4px solid var(--blue);border-radius:var(--radius);background:#fcfbff;padding:14px;margin-bottom:12px}
 .actblock .acttop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .actblock .actno{font-weight:700;color:var(--blue);font-size:13.5px}
@@ -89,7 +89,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
 <div class="topbar no-print">
   <span>جامعة سليمان الراجحي — الإدارة التنفيذية للاتصالات وتقنية المعلومات</span>
-  <span class="ver">الإصدار <span class="sru-en" id="verLabel">v1.6</span></span>
+  <span class="ver">الإصدار <span class="sru-en" id="verLabel">v1.7</span></span>
 </div>
 
 <div class="brandbar">
@@ -264,16 +264,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   </div>
 
   <footer>
-    نموذج الخطة التشغيلية 2026/2027 — الإدارة التنفيذية للاتصالات وتقنية المعلومات، جامعة سليمان الراجحي · الإصدار <span class="sru-en">v1.6</span>
+    نموذج الخطة التشغيلية 2026/2027 — الإدارة التنفيذية للاتصالات وتقنية المعلومات، جامعة سليمان الراجحي · الإصدار <span class="sru-en">v1.7</span>
   </footer>
 </div>
 
 <script>
 /* ============================================================
    الخطة التشغيلية 2026/2027 — ICTD, Sulaiman Alrajhi University
-   Version: v1.6
+   Version: v1.7
    ============================================================ */
-const APP_VERSION = "v1.6";
+const APP_VERSION = "v1.7";
 
 /* رابط Google Apps Script Web App (/exec) — مضبوط ومفعّل */
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbwegw1Vg-MfH2-k3roTtvSlTaWry8-G-bVlZxzwN0GJ0JaCLjiwjaOhMo1q0YaQbISsVQ/exec";

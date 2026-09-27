@@ -1,6 +1,6 @@
 /**
  * الخطة التشغيلية 2026/2027 — الإدارة التنفيذية للاتصالات وتقنية المعلومات
- * Google Apps Script Web App backend  —  Version v1.6
+ * Google Apps Script Web App backend  —  Version v1.7
  *
  * التركيب:
  *  1. أنشئ Google Sheet جديد باسم: "الخطة التشغيلية 2026-2027 - ICTD"

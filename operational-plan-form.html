@@ -89,7 +89,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
 <div class="topbar no-print">
   <span>جامعة سليمان الراجحي — الإدارة التنفيذية للاتصالات وتقنية المعلومات</span>
-  <span class="ver">الإصدار <span class="sru-en" id="verLabel">v1.4</span></span>
+  <span class="ver">الإصدار <span class="sru-en" id="verLabel">v1.6</span></span>
 </div>
 
 <div class="brandbar">
@@ -182,12 +182,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
           </select>
         </div>
         <div class="field">
-          <label>تاريخ البداية<span class="hint">اختر الشهر — يُحفظ بصيغة <span class="sru-en">October 2026</span></span></label>
-          <input id="startDate" type="month">
+          <label>تاريخ البداية</label>
+          <select id="startDate"></select>
         </div>
         <div class="field">
           <label>تاريخ النهاية</label>
-          <input id="endDate" type="month">
+          <select id="endDate"></select>
         </div>
         <div class="field">
           <label>الميزانية</label>
@@ -264,16 +264,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   </div>
 
   <footer>
-    نموذج الخطة التشغيلية 2026/2027 — الإدارة التنفيذية للاتصالات وتقنية المعلومات، جامعة سليمان الراجحي · الإصدار <span class="sru-en">v1.4</span>
+    نموذج الخطة التشغيلية 2026/2027 — الإدارة التنفيذية للاتصالات وتقنية المعلومات، جامعة سليمان الراجحي · الإصدار <span class="sru-en">v1.6</span>
   </footer>
 </div>
 
 <script>
 /* ============================================================
    الخطة التشغيلية 2026/2027 — ICTD, Sulaiman Alrajhi University
-   Version: v1.4
+   Version: v1.6
    ============================================================ */
-const APP_VERSION = "v1.4";
+const APP_VERSION = "v1.6";
 
 /* رابط Google Apps Script Web App (/exec) — مضبوط ومفعّل */
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbwegw1Vg-MfH2-k3roTtvSlTaWry8-G-bVlZxzwN0GJ0JaCLjiwjaOhMo1q0YaQbISsVQ/exec";
@@ -644,6 +644,45 @@ function loadLocal(){
   if(!$("planDate").value) $("planDate").value = new Date().toISOString().slice(0,10);
 }
 
+/* ---------- قوائم الشهور (2026 / 2027 / 2028) ---------- */
+const MONTH_YEARS = [2026, 2027, 2028];
+function buildMonthSelects(){
+  ["startDate","endDate"].forEach(id=>{
+    const sel = $(id);
+    sel.innerHTML = '<option value=""></option>';
+    MONTH_YEARS.forEach(y=>{
+      const g = document.createElement("optgroup"); g.label = String(y);
+      MONTHS.forEach(m=>{
+        const o = document.createElement("option");
+        o.value = m + " " + y; o.textContent = o.value; g.appendChild(o);
+      });
+      sel.appendChild(g);
+    });
+  });
+}
+function monthOptionsHTML(){
+  let h = '<option value=""></option>';
+  MONTH_YEARS.forEach(y=>{
+    h += '<optgroup label="'+y+'">';
+    MONTHS.forEach(m=>{ h += '<option>'+m+' '+y+'</option>'; });
+    h += '</optgroup>';
+  });
+  return h;
+}
+function setSelectValue(sel, val){
+  const v = (val||"").trim();
+  if(!v){ sel.value=""; return; }
+  if(!Array.from(sel.options).some(o=>o.value===v)){
+    const g=document.createElement("optgroup"); g.label="قيم سابقة";
+    const o=document.createElement("option"); o.value=v; o.textContent=v;
+    g.appendChild(o); sel.appendChild(g);
+  }
+  sel.value=v;
+}
+
+/* قيمة قديمة خارج النطاق (مثل September 2024) تُضاف كخيار حتى لا تُفقد */
+function setMonthValue(id, val){ setSelectValue($(id), val); }
+
 /* ---------- الأنشطة التفصيلية (نشاط مستقل بحقوله) ---------- */
 const ACT_KEYS = ["activity","date","kpi","target","risk","mitigation"];
 const ACT_FLAT = {activity:"activities", date:"activityDates", kpi:"kpi", target:"targetValue", risk:"risks", mitigation:"mitigation"};
@@ -659,14 +698,15 @@ function addActivity(data){
     `<div class="grid full actmain"><div class="field"><label>وصف النشاط / المشروع</label>`+
     `<textarea data-k="activity"></textarea></div></div>`+
     `<div class="actgrid">`+
-    `<div class="field"><label>موعد الإتمام<span class="hint">July 2026 – Jun 2027</span></label><textarea data-k="date"></textarea></div>`+
+    `<div class="field"><label>موعد الإتمام</label><select data-k="date">`+monthOptionsHTML()+`</select></div>`+
     `<div class="field"><label>مؤشر الأداء</label><textarea data-k="kpi"></textarea></div>`+
     `<div class="field"><label>القيمة المستهدفة</label><textarea data-k="target"></textarea></div>`+
     `<div class="field"><label>المخاطر المحتملة</label><textarea data-k="risk"></textarea></div>`+
     `<div class="field"><label>خطة المعالجة</label><textarea data-k="mitigation"></textarea></div>`+
     `</div>`;
   wrap.appendChild(div);
-  ACT_KEYS.forEach(k=>{ const t=div.querySelector('[data-k="'+k+'"]'); if(t) t.value = data[k]||""; });
+  ACT_KEYS.forEach(k=>{ const t=div.querySelector('[data-k="'+k+'"]'); if(!t) return;
+    if(k==="date") setSelectValue(t, data[k]); else t.value = data[k]||""; });
   renumberActivities();
   return div;
 }
@@ -723,7 +763,7 @@ function resetForm(){ $("form").reset(); $("recId").value="";
 function fillForm(r){
   $("recId").value = r.id;
   FIELDS.forEach(f=>{ const el=$(f); if(!el) return;
-    el.value = (f==="startDate"||f==="endDate") ? textToMonth(r[f]) : (r[f]||""); });
+    if(f==="startDate"||f==="endDate") setMonthValue(f, r[f]); else el.value = r[f]||""; });
   $("activitiesWrap").innerHTML="";
   itemsFromRecord(r).forEach(it=> addActivity(it));
   renumberActivities();
@@ -732,9 +772,7 @@ function fillForm(r){
 $("form").addEventListener("submit", e=>{
   e.preventDefault();
   const rec = { id: $("recId").value || ("r"+Date.now()) };
-  FIELDS.forEach(f=>{ const el=$(f); let v = el? el.value.trim() : "";
-    if(f==="startDate"||f==="endDate") v = monthToText(v);
-    rec[f]=v; });
+  FIELDS.forEach(f=>{ const el=$(f); rec[f] = el ? el.value.trim() : ""; });
   rec.items = collectActivities();
   Object.assign(rec, flattenActivities(rec.items));
   const i = rows.findIndex(x=>x.id===rec.id);
@@ -926,6 +964,7 @@ function fmtDate(v){ if(!v) return ""; const p=v.split("-"); return p.length===3
 
 /* ---------- init ---------- */
 $("verLabel").textContent = APP_VERSION;
+buildMonthSelects();
 loadLocal();
 render();
 addActivity();

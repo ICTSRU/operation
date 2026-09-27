@@ -89,7 +89,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
 <div class="topbar no-print">
   <span>جامعة سليمان الراجحي — الإدارة التنفيذية للاتصالات وتقنية المعلومات</span>
-  <span class="ver">الإصدار <span class="sru-en" id="verLabel">v1.7</span></span>
+  <span class="ver">الإصدار <span class="sru-en" id="verLabel">v1.8</span></span>
 </div>
 
 <div class="brandbar">
@@ -264,16 +264,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   </div>
 
   <footer>
-    نموذج الخطة التشغيلية 2026/2027 — الإدارة التنفيذية للاتصالات وتقنية المعلومات، جامعة سليمان الراجحي · الإصدار <span class="sru-en">v1.7</span>
+    نموذج الخطة التشغيلية 2026/2027 — الإدارة التنفيذية للاتصالات وتقنية المعلومات، جامعة سليمان الراجحي · الإصدار <span class="sru-en">v1.8</span>
   </footer>
 </div>
 
 <script>
 /* ============================================================
    الخطة التشغيلية 2026/2027 — ICTD, Sulaiman Alrajhi University
-   Version: v1.7
+   Version: v1.8
    ============================================================ */
-const APP_VERSION = "v1.7";
+const APP_VERSION = "v1.8";
 
 /* رابط Google Apps Script Web App (/exec) — مضبوط ومفعّل */
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbwegw1Vg-MfH2-k3roTtvSlTaWry8-G-bVlZxzwN0GJ0JaCLjiwjaOhMo1q0YaQbISsVQ/exec";
@@ -660,6 +660,32 @@ function buildMonthSelects(){
     });
   });
 }
+const KPI_LIST = [["الرضا وتجربة المستفيد", ["معدل رضا المستفيدين عن النظام / الخدمة", "معدل رضا منسوبي الجامعة والطلبة عن مركز الخدمات الرقمية", "التحسن المعرفي بعد التدريب"]], ["التحول الرقمي والترحيل", ["نسبة الأنظمة المرحّلة والمقبولة من خط الأساس المعتمد", "نجاح اختبارات القبول والاستعادة", "نسبة المعاملات / المراسلات المنجزة إلكترونياً"]], ["الحوكمة والامتثال وأمن المعلومات", ["عدد السياسات واللوائح المعتمدة والموثقة", "نسبة الامتثال لمتطلبات سدايا والهيئة الوطنية للأمن السيبراني", "معدل حوادث اختراق البيانات"]], ["التشغيل واستمرارية الخدمة", ["نسبة توافر الخدمات الحرجة (Availability %)", "نسبة الأعطال الجسيمة الموثّق لها تحليل سبب جذري", "نسبة الخدمات المشمولة بنسخ احتياطي واختبار استعادة معتمد", "عدد تمارين التعافي الناجحة وفق RPO / RTO المعتمدين"]], ["البنية التحتية والشبكات", ["نسبة المواقع / الأجهزة التي اجتازت اختبارات القبول", "نسبة تحديث مخططات ووثائق البنية التحتية"]], ["الأتمتة وكفاءة العمليات", ["عدد عمليات الأتمتة المستخدمة فعلياً", "نسبة انخفاض متوسط زمن المعالجة مقارنة بخط الأساس", "نسبة عمليات التشغيل الناجحة"]], ["التدريب وبناء القدرات", ["عدد البرامج التدريبية المنفذة", "عدد المستفيدين من التدريب / الاستشارات"]]];
+function kpiOptionsHTML(){
+  let h = '<option value=""></option>';
+  KPI_LIST.forEach(g=>{
+    h += '<optgroup label="'+g[0]+'">';
+    g[1].forEach(k=>{ h += '<option>'+k+'</option>'; });
+    h += '</optgroup>';
+  });
+  h += '<option value="__other__">أخرى (إدخال يدوي)…</option>';
+  return h;
+}
+function onKpiChange(sel){
+  const box = sel.parentNode.querySelector('[data-k="kpi"]');
+  if(sel.value === "__other__"){ box.style.display="block"; box.value=""; box.focus(); }
+  else { box.style.display="none"; box.value = sel.value; }
+}
+function setKpiValue(block, val){
+  const sel = block.querySelector(".kpisel");
+  const box = block.querySelector('[data-k="kpi"]');
+  const v = (val||"").trim();
+  box.value = v;
+  const known = Array.from(sel.options).some(o=>o.value===v && v!=="");
+  if(v && !known){ sel.value="__other__"; box.style.display="block"; }
+  else { sel.value = v; box.style.display="none"; }
+}
+
 function monthOptionsHTML(){
   let h = '<option value=""></option>';
   MONTH_YEARS.forEach(y=>{
@@ -699,14 +725,17 @@ function addActivity(data){
     `<textarea data-k="activity"></textarea></div></div>`+
     `<div class="actgrid">`+
     `<div class="field"><label>موعد الإتمام</label><select data-k="date">`+monthOptionsHTML()+`</select></div>`+
-    `<div class="field"><label>مؤشر الأداء</label><textarea data-k="kpi"></textarea></div>`+
+    `<div class="field"><label>مؤشر الأداء</label><select class="kpisel" onchange="onKpiChange(this)">`+kpiOptionsHTML()+`</select>`+
+    `<textarea data-k="kpi" style="display:none;margin-top:8px" placeholder="اكتب مؤشر الأداء"></textarea></div>`+
     `<div class="field"><label>القيمة المستهدفة</label><textarea data-k="target"></textarea></div>`+
     `<div class="field"><label>المخاطر المحتملة</label><textarea data-k="risk"></textarea></div>`+
     `<div class="field"><label>خطة المعالجة</label><textarea data-k="mitigation"></textarea></div>`+
     `</div>`;
   wrap.appendChild(div);
   ACT_KEYS.forEach(k=>{ const t=div.querySelector('[data-k="'+k+'"]'); if(!t) return;
-    if(k==="date") setSelectValue(t, data[k]); else t.value = data[k]||""; });
+    if(k==="date") setSelectValue(t, data[k]);
+    else if(k==="kpi") setKpiValue(div, data[k]);
+    else t.value = data[k]||""; });
   renumberActivities();
   return div;
 }

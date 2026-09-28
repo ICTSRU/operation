@@ -82,6 +82,31 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 .actgrid{display:grid;gap:12px;grid-template-columns:1fr;margin-top:10px}
 @media(min-width:760px){.actgrid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1180px){.actgrid{grid-template-columns:repeat(5,1fr)}}
+.msel{position:relative}
+.mselbtn{width:100%;text-align:right;background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:8px 10px;font-size:13.5px;font-weight:400;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mselbtn:hover{border-color:var(--purple)}
+.mselbtn .caret{color:var(--purple);font-size:11px}
+.mselmenu{display:none;position:absolute;z-index:40;top:calc(100% + 4px);right:0;left:0;background:#fff;
+  border:1px solid var(--purple);border-radius:var(--radius);padding:8px;box-shadow:0 6px 18px rgba(36,20,54,.12)}
+.mselmenu.open{display:block}
+.mselitem{display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:13.5px;cursor:pointer;border-radius:3px}
+.mselitem:hover{background:var(--purple-light)}
+.mselitem input[type=checkbox]{width:16px;height:16px;accent-color:var(--purple);margin:0;flex:0 0 16px}
+.mselitem span{flex:1;padding-right:2px}
+.mselmenu input[type=text]{font-size:13px}
+.filterbar{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:14px;
+  background:var(--purple-light);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
+.filterlabel{font-weight:700;font-size:13px;color:var(--purple);padding-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.fchip{background:#fff;border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12.5px;
+  font-weight:600;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:6px}
+.fchip:hover{border-color:var(--purple)}
+.fchip .cnt{background:var(--purple-light);color:var(--purple);border-radius:12px;padding:1px 8px;font-size:11.5px;font-weight:700}
+.fchip.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+.fchip.active .cnt{background:rgba(255,255,255,.22);color:#fff}
+.fchip.zero{opacity:.45}
+.empty{padding:22px;text-align:center;color:var(--muted);font-size:13.5px}
 @media print{.no-print{display:none!important}body{background:#fff}.card{border:none}}
 </style>
 </head>
@@ -89,7 +114,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
 <div class="topbar no-print">
   <span>جامعة سليمان الراجحي — الإدارة التنفيذية للاتصالات وتقنية المعلومات</span>
-  <span class="ver">الإصدار <span class="sru-en" id="verLabel">v1.8</span></span>
+  <span class="ver">الإصدار <span class="sru-en" id="verLabel">v2.1</span></span>
 </div>
 
 <div class="brandbar">
@@ -195,7 +220,19 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
         </div>
         <div class="field">
           <label>الموارد المطلوبة</label>
-          <input id="resources">
+          <div class="msel" id="resWrap">
+            <button type="button" class="mselbtn" id="resBtn" onclick="toggleResMenu(event)">
+              <span id="resLabel">اختر الموارد…</span><span class="caret">▾</span>
+            </button>
+            <div class="mselmenu" id="resMenu">
+              <label class="mselitem"><input type="checkbox" class="resbox" value="موارد بشرية"><span>موارد بشرية</span></label>
+              <label class="mselitem"><input type="checkbox" class="resbox" value="موارد مالية"><span>موارد مالية</span></label>
+              <label class="mselitem"><input type="checkbox" class="resbox" value="موارد تقنية"><span>موارد تقنية</span></label>
+              <label class="mselitem"><input type="checkbox" class="resbox" id="resOther" value="موارد أخرى"><span>موارد أخرى</span></label>
+              <input type="text" id="resOtherText" placeholder="حدد الموارد الأخرى" style="display:none;margin-top:8px">
+            </div>
+          </div>
+          <input type="hidden" id="resources">
         </div>
       </div>
 
@@ -216,7 +253,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
   <!-- ===== السجلات ===== -->
   <div class="stats">
-    <div class="stat"><div class="n" id="stTotal">0</div><div class="l">إجمالي المبادرات</div></div>
+    <div class="stat"><div class="n" id="stTotal">0</div><div class="l" id="stTotalLabel">إجمالي المبادرات</div></div>
     <div class="stat"><div class="n" id="stDone">0</div><div class="l">مكتملة</div></div>
     <div class="stat"><div class="n" id="stProg">0</div><div class="l">قيد التنفيذ</div></div>
     <div class="stat"><div class="n" id="stCrit">0</div><div class="l">أولوية حرجة</div></div>
@@ -224,6 +261,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 
   <div class="card">
     <h2>ثالثاً: سجل المبادرات</h2>
+    <div class="filterbar no-print">
+      <span class="filterlabel">تصفية حسب راعي المبادرة:</span>
+      <div id="sponsorChips" class="chips"></div>
+    </div>
     <div class="btns no-print" style="margin-bottom:14px">
       <button class="btn-blue" onclick="exportExcel()">تصدير إلى إكسل (نفس الهيئة)</button>
       <button class="btn-primary" onclick="syncToSheets()">حفظ الكل في Google Sheets</button>
@@ -264,16 +305,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
   </div>
 
   <footer>
-    نموذج الخطة التشغيلية 2026/2027 — الإدارة التنفيذية للاتصالات وتقنية المعلومات، جامعة سليمان الراجحي · الإصدار <span class="sru-en">v1.8</span>
+    نموذج الخطة التشغيلية 2026/2027 — الإدارة التنفيذية للاتصالات وتقنية المعلومات، جامعة سليمان الراجحي · الإصدار <span class="sru-en">v2.1</span>
   </footer>
 </div>
 
 <script>
 /* ============================================================
    الخطة التشغيلية 2026/2027 — ICTD, Sulaiman Alrajhi University
-   Version: v1.8
+   Version: v2.1
    ============================================================ */
-const APP_VERSION = "v1.8";
+const APP_VERSION = "v2.1";
 
 /* رابط Google Apps Script Web App (/exec) — مضبوط ومفعّل */
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbwegw1Vg-MfH2-k3roTtvSlTaWry8-G-bVlZxzwN0GJ0JaCLjiwjaOhMo1q0YaQbISsVQ/exec";
@@ -660,6 +701,41 @@ function buildMonthSelects(){
     });
   });
 }
+/* ---------- قائمة الموارد (اختيار متعدد) ---------- */
+const RES_FIXED = ["موارد بشرية","موارد مالية","موارد تقنية"];
+function toggleResMenu(e){ e.stopPropagation(); $("resMenu").classList.toggle("open"); }
+function syncResources(){
+  const picked = Array.from(document.querySelectorAll(".resbox:checked")).map(c=>c.value);
+  const other = $("resOther").checked;
+  $("resOtherText").style.display = other ? "block" : "none";
+  if(!other) $("resOtherText").value = "";
+  const out = picked.filter(v=>v!=="موارد أخرى");
+  const txt = $("resOtherText").value.trim();
+  if(other) out.push(txt ? ("موارد أخرى: " + txt) : "موارد أخرى");
+  $("resources").value = out.join("، ");
+  $("resLabel").textContent = out.length ? out.join("، ") : "اختر الموارد…";
+}
+function setResources(val){
+  const parts = String(val||"").split("،").map(x=>x.trim()).filter(Boolean);
+  document.querySelectorAll(".resbox").forEach(c=>{ c.checked=false; });
+  $("resOtherText").value = "";
+  let otherTxt = "";
+  parts.forEach(pt=>{
+    if(RES_FIXED.includes(pt)){
+      document.querySelector('.resbox[value="'+pt+'"]').checked = true;
+    } else {
+      $("resOther").checked = true;
+      otherTxt = otherTxt ? (otherTxt + "، " + pt.replace(/^موارد أخرى:\s*/,"")) : pt.replace(/^موارد أخرى:\s*/,"");
+    }
+  });
+  $("resOtherText").value = otherTxt;
+  syncResources();
+}
+document.addEventListener("click", e=>{
+  const w = $("resWrap");
+  if(w && !w.contains(e.target)) $("resMenu").classList.remove("open");
+});
+
 const KPI_LIST = [["الرضا وتجربة المستفيد", ["معدل رضا المستفيدين عن النظام / الخدمة", "معدل رضا منسوبي الجامعة والطلبة عن مركز الخدمات الرقمية", "التحسن المعرفي بعد التدريب"]], ["التحول الرقمي والترحيل", ["نسبة الأنظمة المرحّلة والمقبولة من خط الأساس المعتمد", "نجاح اختبارات القبول والاستعادة", "نسبة المعاملات / المراسلات المنجزة إلكترونياً"]], ["الحوكمة والامتثال وأمن المعلومات", ["عدد السياسات واللوائح المعتمدة والموثقة", "نسبة الامتثال لمتطلبات سدايا والهيئة الوطنية للأمن السيبراني", "معدل حوادث اختراق البيانات"]], ["التشغيل واستمرارية الخدمة", ["نسبة توافر الخدمات الحرجة (Availability %)", "نسبة الأعطال الجسيمة الموثّق لها تحليل سبب جذري", "نسبة الخدمات المشمولة بنسخ احتياطي واختبار استعادة معتمد", "عدد تمارين التعافي الناجحة وفق RPO / RTO المعتمدين"]], ["البنية التحتية والشبكات", ["نسبة المواقع / الأجهزة التي اجتازت اختبارات القبول", "نسبة تحديث مخططات ووثائق البنية التحتية"]], ["الأتمتة وكفاءة العمليات", ["عدد عمليات الأتمتة المستخدمة فعلياً", "نسبة انخفاض متوسط زمن المعالجة مقارنة بخط الأساس", "نسبة عمليات التشغيل الناجحة"]], ["التدريب وبناء القدرات", ["عدد البرامج التدريبية المنفذة", "عدد المستفيدين من التدريب / الاستشارات"]]];
 function kpiOptionsHTML(){
   let h = '<option value=""></option>';
@@ -788,11 +864,14 @@ function itemsFromRecord(r){
 
 /* ---------- form ---------- */
 function resetForm(){ $("form").reset(); $("recId").value="";
+  setResources(""); $("resMenu").classList.remove("open");
   $("activitiesWrap").innerHTML=""; addActivity(); }
 function fillForm(r){
   $("recId").value = r.id;
   FIELDS.forEach(f=>{ const el=$(f); if(!el) return;
-    if(f==="startDate"||f==="endDate") setMonthValue(f, r[f]); else el.value = r[f]||""; });
+    if(f==="startDate"||f==="endDate") setMonthValue(f, r[f]);
+    else if(f==="resources") setResources(r[f]);
+    else el.value = r[f]||""; });
   $("activitiesWrap").innerHTML="";
   itemsFromRecord(r).forEach(it=> addActivity(it));
   renumberActivities();
@@ -816,10 +895,53 @@ function delRow(id){ if(!confirm("هل تريد حذف هذه المبادرة؟
 function clearAll(){ if(!confirm("سيتم حذف جميع المبادرات المحفوظة محلياً. المتابعة؟")) return;
   rows=[]; saveLocal(); render(); show("تم حذف جميع السجلات المحلية.","ok"); }
 
+/* ---------- فلتر راعي المبادرة ---------- */
+let sponsorFilter = "";
+const NO_SPONSOR = "__none__";
+/* الراعي العام: يشرف على الخطة كاملة، فتُحسب له جميع المبادرات */
+const MASTER_SPONSOR = "د. ناصر ابو نار";
+function filteredRows(){
+  if(!sponsorFilter) return rows;
+  if(sponsorFilter===MASTER_SPONSOR) return rows;
+  if(sponsorFilter===NO_SPONSOR) return rows.filter(r=>!(r.sponsor||"").trim());
+  return rows.filter(r=>(r.sponsor||"").trim()===sponsorFilter);
+}
+function setSponsorFilter(v){ sponsorFilter = (sponsorFilter===v) ? "" : v; render(); }
+function renderSponsorChips(){
+  const host = $("sponsorChips"); if(!host) return;
+  const counts = {};
+  rows.forEach(r=>{ const k=(r.sponsor||"").trim() || NO_SPONSOR; counts[k]=(counts[k]||0)+1; });
+  const names = Array.from($("sponsor").options).map(o=>o.value).filter(Boolean);
+  Object.keys(counts).forEach(k=>{ if(k!==NO_SPONSOR && !names.includes(k)) names.push(k); });
+  let html = `<button type="button" class="fchip${sponsorFilter?"":" active"}" data-sp="">`+
+             `الكل<span class="cnt">${rows.length}</span></button>`;
+  names.forEach(n=>{
+    const c = (n===MASTER_SPONSOR) ? rows.length : (counts[n]||0);
+    html += `<button type="button" class="fchip${sponsorFilter===n?" active":""}${c?"":" zero"}" `+
+            `data-sp="${esc(n)}">${esc(n)}<span class="cnt">${c}</span></button>`;
+  });
+  if(counts[NO_SPONSOR]){
+    html += `<button type="button" class="fchip${sponsorFilter===NO_SPONSOR?" active":""}" `+
+            `data-sp="${NO_SPONSOR}">بدون راعٍ<span class="cnt">${counts[NO_SPONSOR]}</span></button>`;
+  }
+  host.innerHTML = html;
+  host.querySelectorAll(".fchip").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const v = btn.getAttribute("data-sp");
+      if(v === "") { sponsorFilter = ""; render(); } else setSponsorFilter(v);
+    });
+  });
+}
+
 /* ---------- render ---------- */
 function render(){
+  renderSponsorChips();
+  const list = filteredRows();
   const tb=$("tbody"); tb.innerHTML="";
-  rows.forEach((r,i)=>{
+  if(!list.length){
+    tb.innerHTML = '<tr><td colspan="18" class="empty">لا توجد مبادرات مطابقة للتصفية الحالية.</td></tr>';
+  }
+  list.forEach((r,i)=>{
     const pr=(r.priority||"").trim(), st=(r.status||"").trim();
     const tr=document.createElement("tr");
     tr.innerHTML =
@@ -837,10 +959,11 @@ function render(){
       `<button class="btn-danger" onclick="delRow('${r.id}')">حذف</button></div></td>`;
     tb.appendChild(tr);
   });
-  $("stTotal").textContent = rows.length;
-  $("stDone").textContent  = rows.filter(r=>(r.status||"").indexOf("كتمل")>=0).length;
-  $("stProg").textContent  = rows.filter(r=>(r.status||"").indexOf("قيد")>=0).length;
-  $("stCrit").textContent  = rows.filter(r=>(r.priority||"").trim()==="حرجة").length;
+  $("stTotal").textContent = list.length;
+  $("stDone").textContent  = list.filter(r=>(r.status||"").indexOf("كتمل")>=0).length;
+  $("stProg").textContent  = list.filter(r=>(r.status||"").indexOf("قيد")>=0).length;
+  $("stCrit").textContent  = list.filter(r=>(r.priority||"").trim()==="حرجة").length;
+  $("stTotalLabel").textContent = sponsorFilter ? "المبادرات المعروضة" : "إجمالي المبادرات";
 }
 
 /* ---------- Google Sheets ---------- */
@@ -994,6 +1117,10 @@ function fmtDate(v){ if(!v) return ""; const p=v.split("-"); return p.length===3
 /* ---------- init ---------- */
 $("verLabel").textContent = APP_VERSION;
 buildMonthSelects();
+document.querySelectorAll(".resbox").forEach(c=> c.addEventListener("change", syncResources));
+$("resOtherText").addEventListener("input", syncResources);
+$("resOtherText").addEventListener("click", e=> e.stopPropagation());
+syncResources();
 loadLocal();
 render();
 addActivity();
